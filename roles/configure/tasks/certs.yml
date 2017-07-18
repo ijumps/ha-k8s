@@ -1,0 +1,28 @@
+---
+# Generate certs for kubernetes.
+
+- name: Determine cert altnames
+  set_fact:
+    cert_altname_list:
+      - "{{ load_balancer_domain }}"
+
+- name: Add load balancer vip
+  set_fact:
+    cert_altname_list: "{{ cert_altname_list }} + ['{{ load_balancer_vip }}']"
+  when: load_balancer_vip != ""
+
+- name: Add each master ip
+  set_fact:
+    cert_altname_list: "{{ cert_altname_list | union(hostvars[item]['ansible_all_ipv4_addresses']) }}"
+  with_items:
+    - "{{ groups['masters'] }}"
+
+- name: Add each master name
+  set_fact:
+    cert_altname_list: "{{ cert_altname_list }} + {{ groups['masters'] }}"
+
+- set_fact:
+    cert_altnames: "{{ cert_altname_list|join(',') }}"
+
+- name: Generate certs
+  shell: kubeadm alpha phase certs selfsign --apiserver-advertise-address={{ hostvars[groups['masters'][0]]['ansible_host'] }} --cert-altnames "{{ cert_altnames }}" --service-cidr="{{ kube_service_cidr }}"

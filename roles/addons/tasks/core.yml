@@ -1,0 +1,30 @@
+---
+# Install essential addons.
+
+- name: Copy essential addons yaml
+  template:
+  args:
+    src: "{{ item }}"
+    dest: "{{ kube_addons_dir }}/{{ item }}"
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - kube-dns-sa.yaml
+    - kube-dns-deployment.yaml
+    - kube-dns-service.yaml
+    - kube-proxy-sa.yaml
+    - kube-proxy-clusterrolebinding.yaml
+    - kube-proxy-configmap.yaml
+    - kube-proxy-daemonset.yaml
+
+- name: Install essential addons
+  command: "kubectl apply --kubeconfig={{ kube_config_dir }}/admin.kubeconfig -f {{ kube_addons_dir }}/{{ item }}"
+  with_items:
+    - kube-dns-sa.yaml
+    - kube-dns-deployment.yaml
+    - kube-dns-service.yaml
+    - kube-proxy-sa.yaml
+    - kube-proxy-clusterrolebinding.yaml
+    - kube-proxy-configmap.yaml
+    - kube-proxy-daemonset.yaml

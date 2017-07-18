@@ -1,0 +1,27 @@
+---
+# Set facts.
+
+- name: Determine which docker registry to use
+  set_fact:
+    docker_registry: "{{ docker_registry_gcr }}"
+- set_fact:
+    docker_registry: "{{ docker_registry_caicloudgcr }}"
+  when: location == "cn"
+
+- name: Choose image source
+  set_fact:
+    calico_node_image: quay.io/calico/node:v1.2.1
+    calico_cni_image: quay.io/calico/cni:v1.8.3
+    flannel_image: quay.io/coreos/flannel:v0.7.1
+- set_fact:
+    calico_node_image: "{{ docker_registry_caicloud }}/calico-node:v1.2.1"
+    calico_cni_image: "{{ docker_registry_caicloud }}/calico-cni:v1.8.3"
+    flannel_image: "{{ docker_registry_caicloud }}/flannel:v0.7.1"
+  when: location == "cn"
+
+- name: Determine apiserver endpoint ip
+  set_fact:
+    kube_apiserver_endpoint_ip: "{{ hostvars[groups['masters'][0]]['ansible_host'] }}"
+- set_fact:
+    kube_apiserver_endpoint_ip: "{{ load_balancer_vip }}"
+  when: load_balancer_vip != ""

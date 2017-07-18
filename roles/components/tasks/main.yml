@@ -1,0 +1,17 @@
+---
+# Install kubernetes components.
+
+- name: Preflight for install kubernetes components
+  include: preflight_yum.yml
+  when: ansible_distribution in yum_os_family
+
+- name: Install kubernetes components
+  include: components_global_yum.yml
+  when: location == "global" and ansible_distribution in yum_os_family
+
+- name: Install kubernetes components from mirror
+  include: components_cn_yum.yml
+  when: location == "cn" and ansible_distribution in yum_os_family
+
+- name: Configure for components
+  include: configure.yml

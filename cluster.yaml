@@ -1,0 +1,43 @@
+# Configure for creating a HA kubernetes cluster.
+
+# Masters ssh info.
+masters_info:
+  - user: root
+    pass: pass
+    ip: 1.2.3.4
+  - user: root
+    pass: pass
+    ip: 1.2.3.4
+  - user: root
+    pass: pass
+    ip: 1.2.3.4
+
+# Nodes ssh info.
+nodes_info:
+  - user: root
+    pass: pass
+    ip: 1.2.3.4
+
+# Mirror for packages and images.
+# If location is set to `cn`, kubernetes packages will install locally,
+# and all kubernetes images will pull from a mirror in china.
+location: cn
+docker_registry_caicloudgcr: cargo.caicloud.io/caicloudgcr
+docker_registry_caicloud: cargo.caicloud.io/caicloud
+docker_registry_gcr: gcr.io/google_containers
+
+# HA configure.
+# Current we use keepalived and haproxy to build a high availability kubernetes cluster.
+load_balancer_vip: "192.168.100.253"
+
+# Cluster configure.
+# Kubernetes internal network for services.
+kube_service_cidr: 10.254.0.0/16
+# Cluster cidr for cni network plugin.
+cluster_cidr: 192.168.64.0/20
+# Internal DNS domain name. This domain must not be used in internal network.
+# Services will be discoverable under <service-name>.<namespace>.<domainname>,
+# e.g. myservice.default.svc.cluster.local.
+dns_domain: "cluster.local"
+# Domain name used for access cluster via load balancer.
+load_balancer_domain: "www.example.com"

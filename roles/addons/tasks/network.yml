@@ -1,0 +1,6 @@
+---
+# Install network plugin.
+
+- name: Install network plugin use canal
+  include: network_canal.yml
+  when: networking == "canal"

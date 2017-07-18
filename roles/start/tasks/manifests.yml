@@ -1,0 +1,54 @@
+---
+# Place manifests.
+
+- name: Make sure {{ item }} directory exists
+  file: path={{ item }} state=directory
+  with_items:
+    - "{{ kube_manifest_dir }}"
+    - "{{ keepalived_config_dir }}"
+    - "{{ haproxy_config_dir }}"
+
+- name: Place kubernetes manifests for masters
+  copy:
+    src: "{{ kube_manifest_dir }}/{{ item }}-{{ inventory_hostname }}.yaml"
+    dest: "{{ kube_manifest_dir }}/{{ item }}.yaml"
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+
+- name: Place etcd manifests
+  copy:
+    src: "{{ kube_manifest_dir }}/{{ item }}-{{ inventory_hostname }}.yaml"
+    dest: "{{ kube_manifest_dir }}/{{ item }}.yaml"
+  with_items:
+    - etcd
+
+- name: Place load balancer manifests
+  copy:
+    src: "{{ kube_manifest_dir }}/{{ item }}-{{ inventory_hostname }}.yaml"
+    dest: "{{ kube_manifest_dir }}/{{ item }}.yaml"
+  with_items:
+    - loadbalancer
+
+- name: Copy load balancer configure
+  copy:
+    src: "keepalived/{{ item }}"
+    dest: "{{ keepalived_config_dir }}/{{ item }}"
+  with_items:
+    - check_haproxy.py
+    - notify_state.sh
+
+- name: Place keepalived configure
+  copy:
+    src: "{{ kube_manifest_dir }}/{{ item }}-{{ inventory_hostname }}.conf"
+    dest: "{{ keepalived_config_dir }}/{{ item }}.conf"
+  with_items:
+    - keepalived
+
+- name: Place haproxy configure
+  copy:
+    src: "{{ kube_manifest_dir }}/{{ item }}-{{ inventory_hostname }}.cfg"
+    dest: "{{ haproxy_config_dir }}/{{ item }}.cfg"
+  with_items:
+    - haproxy

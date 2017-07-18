@@ -1,0 +1,26 @@
+---
+# Set up inventory.
+
+- name: Add master inventory info
+  add_host: name=master-{{ masters_info[item|int -1].ip }}
+            groups=masters
+            ansible_host={{ masters_info[item|int -1].ip }}
+            ansible_user={{ masters_info[item|int -1].user }}
+            ansible_ssh_pass={{ masters_info[item|int -1].pass }}
+  with_sequence: count={{ masters_info | count }}
+
+- name: Add etcd inventory info | It's the same with masters
+  add_host: name=master-{{ masters_info[item|int -1].ip }}
+            groups=etcd
+            ansible_host={{ masters_info[item|int -1].ip }}
+            ansible_user={{ masters_info[item|int -1].user }}
+            ansible_ssh_pass={{ masters_info[item|int -1].pass }}
+  with_sequence: count={{ masters_info | count }}
+
+- name: Add node inventory info
+  add_host: name=node-{{ nodes_info[item|int -1].ip }}
+            groups=nodes
+            ansible_host={{ nodes_info[item|int -1].ip }}
+            ansible_user={{ nodes_info[item|int -1].user }}
+            ansible_ssh_pass={{ nodes_info[item|int -1].pass }}
+  with_sequence: count={{ nodes_info | count }}

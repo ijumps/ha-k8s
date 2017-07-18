@@ -1,0 +1,11 @@
+---
+# Configure for kubernetes.
+
+- name: Generate certs
+  include: certs.yml
+
+- name: Generate kubeconfig
+  include: kubeconfig.yml
+
+- name: Generate manifests
+  include: manifests.yml

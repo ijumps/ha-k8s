@@ -1,0 +1,9 @@
+---
+# Init.
+
+- name: Set facts
+  include: facts.yml
+  delegate_to: "{{ item }}"
+  with_items:
+   - localhost
+   - "{{ groups['masters'] }}"

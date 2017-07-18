@@ -1,0 +1,61 @@
+---
+# Generate manifests file.
+
+# Master components manifests.
+- name: Generate kubernetes manifests for masters
+  template: src={{ item[0] }}.yaml dest={{ kube_manifest_dir }}/{{ item[0] }}-{{ item[1] }}.yaml
+  with_nested:
+    - [ kube-apiserver, kube-controller-manager, kube-scheduler ]
+    - "{{ groups['masters'] }}"
+
+# Etcd components manifests.
+- name: Generate etcd manifests
+  template: src=etcd.yaml dest={{ kube_manifest_dir }}/etcd-{{ item }}.yaml
+  with_items:
+    - "{{ groups['etcd'] }}"
+  vars:
+    etcd_initial_advertise_peer_urls: "{{ etcd_peer_url_scheme }}://{{ hostvars[item]['ansible_host'] }}:{{ etcd_peer_port }}"
+    etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ hostvars[item]['ansible_host'] }}:{{ etcd_client_port }}"
+
+# Load balancer manifests.
+- name: Determine use keepalived or not | Set default to false
+  set_fact:
+    use_keepalived: false
+    use_load_balancer: false
+
+- name: Determine use keepalived or not
+  set_fact:
+    use_keepalived: true
+    use_load_balancer: true
+  when: groups['masters'] | count > 1
+
+- name: Get interface for keepalived
+  shell:  ip addr show | grep '^ *inet' | grep "{{ hostvars[item]['ansible_host'] }}" | awk '{print $NF}'
+  register: interfaces
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ groups['masters'] }}"
+
+- name: Create load balancer | {{ load_balancer_name }}.pem
+  shell: |
+    cat {{ kube_cert_dir }}/apiserver.crt > {{ kube_cert_dir }}/{{ load_balancer_name }}.pem;
+    echo >> {{ kube_cert_dir }}/{{ load_balancer_name }}.pem;
+    cat {{ kube_cert_dir }}/apiserver.key >> {{ kube_cert_dir }}/{{ load_balancer_name }}.pem;
+
+- name: Generate load balancer manifests
+  template: src=loadbalancer.yaml dest={{ kube_manifest_dir }}/loadbalancer-{{ item }}.yaml
+  with_items:
+    - "{{ groups['masters'] }}"
+
+- name: Generate keepalived configure
+  template: src=keepalived.conf dest={{ kube_manifest_dir }}/keepalived-{{ item }}.conf
+  vars:
+    interface: "{{ interfaces.results[groups['masters'].index(item) | int] }}"
+    priority: "{{ 100 - (groups['masters'].index(item) | int) * 3 }}"
+  with_items:
+    - "{{ groups['masters'] }}"
+
+- name: Generate haproxy configure
+  template: src=haproxy.cfg dest={{ kube_manifest_dir }}/haproxy-{{ item }}.cfg
+  with_items:
+    - "{{ groups['masters'] }}"

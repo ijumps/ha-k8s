@@ -1,0 +1,27 @@
+---
+# Preflight for install kubernetes components.
+
+# Stop firewalld
+- name: Check if firewalld service exists
+  set_fact:
+    firewalld_existing: True
+- command: systemctl status firewalld
+  register: output
+  failed_when: False
+- set_fact:
+    firewalld_existing: False
+  when: output.stdout.find("not be found") != -1
+
+- name: Stop and mask the firewalld service
+  command: "{{ item }}"
+  with_items:
+    - systemctl daemon-reexec
+    - systemctl stop firewalld
+    - systemctl mask firewalld
+  when: firewalld_existing
+  failed_when: False
+
+# Disable selinux
+- name: Set selinux permissive because tokens and selinux does not work together
+  selinux: state=permissive policy={{ ansible_selinux.type }}
+  when: ansible_selinux is defined and ansible_selinux.status == "enabled"

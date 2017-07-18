@@ -1,0 +1,14 @@
+---
+# Install addons.
+
+- name: Install network plugin
+  include: network.yml
+  when: inventory_hostname == groups['masters'][0]
+
+- name: Install essential addons
+  include: core.yml
+  when: inventory_hostname == groups['masters'][0]
+
+# - name: logging
+
+# - name: monitoring

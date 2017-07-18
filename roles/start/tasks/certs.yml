@@ -1,0 +1,17 @@
+---
+# Place certs.
+
+- name: Make sure {{ kube_cert_dir }} directory exists
+  file: path={{ kube_cert_dir }} state=directory
+
+- name: Place certs on masters
+  copy:
+    src: "{{ kube_cert_dir }}"
+    dest: "{{ kube_config_dir }}"
+  when: inventory_hostname in groups['masters']
+
+- name: Place certs on nodes
+  copy:
+    src: "{{ kube_cert_dir }}/ca.crt"
+    dest: "{{ kube_cert_dir }}/ca.crt"
+  when: inventory_hostname in groups['nodes']

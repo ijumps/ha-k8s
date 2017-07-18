@@ -1,0 +1,12 @@
+---
+# Install kubernetes components.
+
+- name: Install components from mirror
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - docker
+    - http://7xli2p.dl1.z0.glb.clouddn.com/kubelet-1.7.0-0.x86_64.rpm
+    - http://7xli2p.dl1.z0.glb.clouddn.com/kubernetes-cni-0.5.1-0.x86_64.rpm
+    - http://7xli2p.dl1.z0.glb.clouddn.com/kubectl-1.7.0-0.x86_64.rpm

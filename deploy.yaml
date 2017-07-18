@@ -1,0 +1,60 @@
+---
+# This playbook deploys a HA kubernetes cluster.
+
+- name: Inventory
+  hosts:
+    - localhost
+  become: yes
+  roles:
+    - inventory
+  tags:
+    - inventory
+
+- name: Init
+  hosts:
+    - localhost
+    - masters
+    - nodes
+  become: yes
+  roles:
+    - init
+  tags:
+    - init
+
+- name: Install kubernetes components
+  hosts:
+    - masters
+    - nodes
+  become: yes
+  roles:
+    - components
+  tags:
+    - components
+
+- name: Configure for kubernetes
+  hosts:
+    - localhost
+  become: yes
+  roles:
+    - configure
+  tags:
+    - configure
+
+- name: Start kubernetes cluster
+  hosts:
+    - masters
+    - nodes
+  become: yes
+  roles:
+    - start
+  tags:
+    - start
+
+- name: Install addons
+  hosts:
+    - masters
+  become: yes
+  roles:
+    - addons
+  tags:
+    - addons

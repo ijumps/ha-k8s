@@ -1,0 +1,15 @@
+---
+# Start kubernetes cluster.
+
+- name: Place certs
+  include: certs.yml
+
+- name: Place kubeconfig
+  include: kubeconfig.yml
+
+- name: Place manifests
+  include: manifests.yml
+  when: inventory_hostname in groups['masters']
+
+- name: Start services
+  include: start.yml

@@ -1,0 +1,21 @@
+---
+# Configure for components.
+
+# Configure for kubelet
+- name: Make sure {{ kubelet_service_dir }} directory exists
+  file: path={{ kubelet_service_dir }} state=directory
+
+- name: Add configure for kubelet
+  template: src={{ item }} dest={{ kubelet_service_dir }}/{{ item }}
+  with_items:
+    - 10-kubeadm.conf
+    - 20-pod-infra-image.conf
+
+- name: Stop components
+  systemd:
+    state: stopped
+    daemon_reload: yes
+    name: "{{ item }}"
+  with_items:
+    - kubelet
+    - docker

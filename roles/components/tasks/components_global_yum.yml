@@ -1,0 +1,16 @@
+---
+# Install kubernetes components.
+
+- name: Copy kubernetes repo
+  copy:
+    src=kubernetes.repo
+    dest=/etc/yum.repos.d/kubernetes.repo
+    mode=0644
+
+- name: Install components
+  yum: name={{ item }}
+  with_items:
+    - docker
+    - kubelet
+    - kubectl
+    - kubernetes-cni

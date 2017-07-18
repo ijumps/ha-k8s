@@ -1,0 +1,23 @@
+---
+# Network plugin use canal.
+
+- name: Create directory for canal
+  file: path="{{ kube_addons_dir }}" state=directory owner=root group=root mode=0755
+
+- name: Copy canal yaml
+  template:
+  args:
+    src: "{{ item }}"
+    dest: "{{ kube_addons_dir }}/{{ item }}"
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - canal-rbac.yaml
+    - canal.yaml
+
+- name: Install canal
+  command: "kubectl apply --kubeconfig={{ kube_config_dir }}/admin.kubeconfig -f {{ kube_addons_dir }}/{{ item }}"
+  with_items:
+    - canal-rbac.yaml
+    - canal.yaml

@@ -1,0 +1,62 @@
+# OS family
+yum_os_family:
+  - CentOS
+  - RedHat
+  - OracleLinux
+apt_os_family:
+  - Debian
+  - Ubuntu
+
+# Network implementation, valid options: canal
+networking: canal
+
+# Etcd cluster configure
+etcd_peers_group: etcd
+etcd_url_scheme: http
+etcd_peer_url_scheme: http
+etcd_data_dir: "/var/lib/etcd"
+etcd_config_dir: "/etc/sysconfig"
+etcd_client_port: 2379
+etcd_peer_port: 2380
+etcd_initial_cluster_state: new
+etcd_initial_cluster_token: etcd-k8-cluster
+etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://0.0.0.0:{{ etcd_peer_port }}"
+etcd_listen_client_urls: "{{ etcd_url_scheme }}://0.0.0.0:{{ etcd_client_port }}"
+etcd_ca_file: "{{ etcd_config_dir }}/ca.crt"
+etcd_cert_file: "{{ etcd_config_dir }}/server.crt"
+etcd_key_file: "{{ etcd_config_dir }}/server.key"
+etcd_peer_ca_file: "{{ etcd_config_dir }}/ca.crt"
+etcd_peer_cert_file: "{{ etcd_config_dir }}/peer.crt"
+etcd_peer_key_file: "{{ etcd_config_dir }}/peer.key"
+
+registry_prefix: "cargo.caicloud.io"
+registry_prefix_caicloud: "{{ registry_prefix }}/caicloud"
+load_balancer_haproxy_image: "{{ registry_prefix_caicloud }}/haproxy:v1.6.5"
+load_balancer_keepalived_image: "{{ registry_prefix_caicloud }}/keepalived:v1.2.19"
+
+kube_config_dir: "/etc/kubernetes"
+kube_addons_dir: "{{ kube_config_dir }}/addons"
+kube_manifest_dir: "{{ kube_config_dir }}/manifests"
+kube_cert_dir: "{{ kube_config_dir }}/pki"
+
+kubelet_service_dir: /etc/systemd/system/kubelet.service.d
+
+# Default imagePullPolicy
+default_imagepullpolicy: IfNotPresent
+
+load_balancer_port: "443"
+load_balancer_stats_port: "80"
+load_balancer_default_vip: "192.168.205.253"
+load_balancer_vrid: "1"
+kube_master_api_port: "6443"
+kube_scheduler_port: "10251"
+kube_controller_port: "10252"
+load_balancer_name: "master-loadbalancer"
+
+# IP address of the DNS server. The IP address must be from the range specified
+# as kube_service_cidr. This magic will actually pick the 100th ip address
+# in the kube_service_cidr range and use that.
+dns_server: "{{ kube_service_cidr|ipaddr('net')|ipaddr(100)|ipaddr('address') }}"
+
+haproxy_config_dir:  "/etc/haproxy"
+keepalived_config_dir:  "/etc/keepalived"
